@@ -17,9 +17,9 @@
   //---------------------------------------------------------------------------
 
   var database = firebase.database()
-  var connectionsRef = database.ref("/connections")
-  var connectedRef = database.ref(".info/connected")
-  var stage = database.ref("/stage")
+      /*  var connectionsRef = database.ref("/connections")
+        var connectedRef = database.ref(".info/connected")
+        var stage = database.ref("/stage")*/
   var currentPlayerNumber = 0;
   var thisPlayerNumber = 0;
   var playerId_;
@@ -27,7 +27,7 @@
   var player1Choice;
   var player2Choice;
   var postKey = [];
-  postKey = database.ref().child("/connections").push().key
+  postKey = database.ref().push().key
   console.log(postKey)
 
   //---------------------------------------------------------------------------
@@ -42,11 +42,10 @@
   }
 
   function pushUserToFirebase() {
-      setTimeout(function() {
-          database.ref(postKey).set(data)
-          database.ref(postKey).onDisconnect().remove()
-      }, 3000)
+      database.ref(postKey).set(data)
+      database.ref(postKey).onDisconnect().remove()
   }
+
 
   pushUserToFirebase()
 
@@ -57,17 +56,11 @@
   //
   //---------------------------------------------------------------------------
 
-  connectedRef.on("value", function(snap) {
-      console.log(snap.val())
-      console.log(snap)
-      if (snap.val()) {
-          var con = connectionsRef.push(true)
-          con.onDisconnect().remove()
-      }
-  })
 
+  database.ref().on("value", function(snap) {
 
-  connectionsRef.on("value", function(snap) {
+      var temp = snap.val()
+      console.log(temp[postKey])
       if (snap.numChildren() >= 3) {
           /*          console.log("more than 2 players")*/
           $("#connected-users").html("more than 2 players")
@@ -75,13 +68,7 @@
           currentPlayerNumber = snap.numChildren()
           $("#connected-users").html(currentPlayerNumber)
 
-      }
-
-  })
-
-  database.ref().on("value", function(snap){
-    var temp = snap.val()
-    console.log(temp[postKey])
+      } 
   })
 
   //---------------------------------------------------------------------------
@@ -111,11 +98,16 @@
 
 
   function whenChoiceIsPicked() {
-    database.ref().on("value", function(snap) {
-      database.
-    })
+      database.ref().on("value", function(snap) {
+          console.log(snap.val())
+              /*      snap.forEach(function(snapChild){
+                      var childKey = snapChild.key;
+                      var childData = snapChild.val();
+                      console.log(childKey)
+                      console.log(childData)
+                    })*/
+      })
   }
-
   /*
     console.log(map)
     console.log(compare(testChoice1, testChoice3))
