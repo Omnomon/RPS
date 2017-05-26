@@ -43,8 +43,8 @@ $(document).ready(function() {
     }
 
     function pushUserToFirebase() {
-        database.ref(postKey).set(data)
-        database.ref(postKey).onDisconnect().remove()
+        database.ref("/users/" + postKey).set(data)
+        database.ref("/users/" + postKey).onDisconnect().remove()
     }
 
 
@@ -58,7 +58,7 @@ $(document).ready(function() {
     //---------------------------------------------------------------------------
 
 
-    database.ref().on("value", function(snap) {
+    database.ref("/users").on("value", function(snap) {
 
         var temp = snap.val()
         if (snap.numChildren() >= 3) {
@@ -94,10 +94,10 @@ $(document).ready(function() {
 
     function compare(choice1, choice2) {
         if ((map[choice1] || {})[choice2]) {
-          database.ref(keys[0]).set({
+          database.ref("/users/" + keys[0]).set({
             choice: ""
           })
-           database.ref(keys[1]).set({
+           database.ref("/users/" + keys[1]).set({
             choice: ""
           })
            return (map[choice1] || {})[choice2]
@@ -121,7 +121,7 @@ $(document).ready(function() {
     //---------------------------------------------------------------------------
 
 
-      database.ref().on("value", function(snap) {
+      database.ref("/users").on("value", function(snap) {
           console.log(snap.val())
           var temp = snap.val()
           picks = Object.values(snap.val())
@@ -137,22 +137,19 @@ $(document).ready(function() {
 
                 
       })
-/*
-      database.ref().on("child_changed", function(snap) {
 
-      })  */
 
     $(document).on("click", "#rock", function(event) {
         console.log("rock works")
         event.preventDefault();
-        database.ref(postKey).set({
+        database.ref("/users/" + postKey).set({
             choice: "rock"
         })
     }).blur()
 
     $(document).on("click", "#paper", function(event) {
         event.preventDefault();
-        database.ref(postKey).set({
+        database.ref("/users/" + postKey).set({
             choice: "paper"
         })
         console.log("paper works")
@@ -160,7 +157,7 @@ $(document).ready(function() {
 
     $(document).on("click", "#scissors", function(event) {
         event.preventDefault();
-        database.ref(postKey).set({
+        database.ref("/users/" + postKey).set({
             choice: "scissors"
         })
         console.log("scissors works")
