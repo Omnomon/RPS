@@ -43,18 +43,15 @@ $(document).ready(function() {
         //---------------------------------------------------------------------------
 
 
-    data = {
-        choice: ""
-    }
 
+    function workAround() {
+        $(".winnerIs").html("")
 
-
-    function pushUserToFirebase() {
         database.ref("/users").on("value", function(snap) {
             if (snap.numChildren() >= 2) {
                 return
             } else {
-                database.ref("/users/" + postKey).set(data)
+                database.ref("/users/" + postKey).set({ choice: "" })
                 database.ref("/users/" + postKey).onDisconnect().remove()
                 var playerNumber = snap.numChildren()
                 playerIs = "Player " + (playerNumber + 1)
@@ -63,7 +60,7 @@ $(document).ready(function() {
         })
 
     }
-    pushUserToFirebase()
+
 
     //---------------------------------------------------------------------------
     //
@@ -107,81 +104,86 @@ $(document).ready(function() {
     //---------------------------------------------------------------------------
 
 
-    database.ref("/users").on("value", function(snap) {
-        console.log(snap.val())
-        var temp = snap.val()
-        picks = Object.values(snap.val())
-        keys = Object.keys(snap.val())
-        console.log(picks)
-        console.log(keys[0])
-        if (picks.length === 2) {
-            var winner = compare(picks[0].choice, picks[1].choice)
-            database.ref("/users/" + keys[0]).set({
-                choice: ""
-            })
-            database.ref("/users/" + keys[1]).set({
-                choice: ""
-            })
-            winLossCounter()
-        }
-
-        function winLossCounter() {
-            if (winner === "waiting") {
-                $(".winnerIs").html("Waiting for the other user to select a choice...")
-            } else if (winner === playerChoice) {
-                $(".winnerIs").html("You win!")
-                wins++
-                $(".wins").html(wins)
-            } else if (winner === "tie") {
-                $(".winnerIs").html("Tie...")
-            } else {
-                $(".winnerIs").html("You lost!")
-                losses++
-                $(".losses").html(losses)
-            }
-
-
-        }
-    })
-
 
     $(document).on("click", "#rock", function(event) {
-        event.preventDefault();
-        $(".winnerIs").html("")
         database.ref("/users/" + postKey).set({
             choice: "rock"
-        })
-        playerChoice = "rock"
-        $(".playerPicked").html("Rock")
-        console.log("rock works")
+        });
+        playerChoice = "rock";
+        $(".playerPicked").html("Rock");
+        console.log("player choice is" + playerChoice)
 
-    }).blur()
+        $(this).blur();
+        workAround2();
+
+    })
 
     $(document).on("click", "#paper", function(event) {
-        event.preventDefault();
-        $(".winnerIs").html("")
         database.ref("/users/" + postKey).set({
             choice: "paper"
-        })
-        playerChoice = "paper"
-        $(".playerPicked").html("Paper")
-
-
-        console.log("paper works")
-    }).blur()
+        });
+        playerChoice = "paper";
+        $(".playerPicked").html("Paper");
+        $(this).blur();
+        workAround2();
+        console.log("player choice is" + playerChoice)
+    })
 
     $(document).on("click", "#scissors", function(event) {
-        event.preventDefault();
-        $(".winnerIs").html("")
         database.ref("/users/" + postKey).set({
             choice: "scissors"
+        });
+        playerChoice = "scissors";
+        $(".playerPicked").html("Scissors");
+        $(this).blur();
+        workAround2();
+        console.log("player choice is" + playerChoice)
+    })
+
+    workAround()
+
+    function workAround2() {
+
+        database.ref("/users").on("value", function(snap) {
+            console.log(snap.val())
+            console.log(this)
+            picks = Object.values(snap.val())
+            keys = Object.keys(snap.val())
+            console.log(picks)
+            console.log(keys)
+            var ownKey = keys.find(findKey)
+
+            function findKey() {
+                return postKey
+            }
+            /*        console.log(ownKey)*/
+
+            if (picks.length === 2) {
+                var ownKeyIndex = keys.indexOf(ownKey)
+                var otherKey = keys.splice(ownKeyIndex, 1)
+                var winner = compare(picks[0].choice, picks[1].choice)
+                console.log("player choice is" + playerChoice)
+                console.log(" winner is " + winner)
+
+                if (winner === "waiting") {
+                    $(".winnerIs").html("Waiting for the other user to select a choice...")
+                } else if (winner === playerChoice) {
+                    $(".winnerIs").html("You win!")
+                    wins++
+                    $(".wins").html(wins)
+                } else if (winner === "tie") {
+                    $(".winnerIs").html("Tie...")
+                } else {
+                    $(".winnerIs").html("You lost!")
+                    losses++
+                    $(".losses").html(losses)
+                }
+
+            }
         })
-        playerChoice = "scissors"
-        $(".playerPicked").html("Scissors")
 
 
-        console.log("scissors works")
-    }).blur()
+    }
 
     //---------------------------------------------------------------------------
     //
@@ -207,9 +209,6 @@ $(document).ready(function() {
     })
 
     var startListening = function() {
-        database.ref("/users").on("child_added", function(snap) {
-            playerIs = "Player " + (playerNumber + 1)
-        })
 
         database.ref("/chat").on("child_added", function(snap) {
             var msg = snap.val()
