@@ -24,8 +24,6 @@ $(document).ready(function() {
     var postKey;
     var playerChoice;
     var postKey = [];
-    postKey = database.ref().push().key
-    console.log(postKey)
     var wins = 0;
     var losses = 0;
     var picks = [];
@@ -33,7 +31,8 @@ $(document).ready(function() {
     var childData;
     var childKey;
     var playerIs
-
+    postKey = database.ref().push().key
+    console.log(postKey)
     $(".wins").html(wins)
     $(".losses").html(losses)
         //---------------------------------------------------------------------------
@@ -44,22 +43,22 @@ $(document).ready(function() {
 
 
 
-    function workAround() {
-        $(".winnerIs").html("")
 
-        database.ref("/users").on("value", function(snap) {
-            if (snap.numChildren() >= 2) {
-                return
-            } else {
-                database.ref("/users/" + postKey).set({ choice: "" })
-                database.ref("/users/" + postKey).onDisconnect().remove()
-                var playerNumber = snap.numChildren()
-                playerIs = "Player " + (playerNumber + 1)
-                $(".playerNumber").html(playerIs)
-            }
-        })
+    $(".winnerIs").html("")
+    database.ref("/users").on("value", function(snap) {
 
-    }
+        if (snap.numChildren() >= 2) {
+            return
+        } else {
+            database.ref("/users/" + postKey).set({ choice: "waiting" })
+            var playerNumber = snap.numChildren()
+            playerIs = "Player " + (playerNumber + 1)
+            $(".playerNumber").html(playerIs)
+        }
+
+        database.ref("/users").off()
+    })
+
 
 
     //---------------------------------------------------------------------------
@@ -88,14 +87,8 @@ $(document).ready(function() {
     function compare(choice1, choice2) {
         if ((map[choice1] || {})[choice2]) {
             return (map[choice1] || {})[choice2]
-        } else {
-            return "waiting"
         }
-
     }
-
-
-
 
     //---------------------------------------------------------------------------
     //
@@ -106,6 +99,7 @@ $(document).ready(function() {
 
 
     $(document).on("click", "#rock", function(event) {
+        var winner;
         database.ref("/users/" + postKey).set({
             choice: "rock"
         });
@@ -114,61 +108,98 @@ $(document).ready(function() {
         console.log("player choice is" + playerChoice)
 
         $(this).blur();
-        workAround2();
-
     })
 
     $(document).on("click", "#paper", function(event) {
+        var winner
         database.ref("/users/" + postKey).set({
             choice: "paper"
         });
         playerChoice = "paper";
         $(".playerPicked").html("Paper");
         $(this).blur();
-        workAround2();
+
         console.log("player choice is" + playerChoice)
     })
 
     $(document).on("click", "#scissors", function(event) {
+        var winner;
         database.ref("/users/" + postKey).set({
             choice: "scissors"
         });
         playerChoice = "scissors";
         $(".playerPicked").html("Scissors");
         $(this).blur();
-        workAround2();
+
         console.log("player choice is" + playerChoice)
     })
 
-    workAround()
+    function findKey() {
+        return postKey
+    }
 
-    function workAround2() {
 
-        database.ref("/users").on("value", function(snap) {
-            console.log(snap.val())
-            console.log(this)
-            picks = Object.values(snap.val())
-            keys = Object.keys(snap.val())
-            console.log(picks)
-            console.log(keys)
-            var ownKey = keys.find(findKey)
+    /*    database.ref("/users").on("value", function(snap) {
 
-            function findKey() {
-                return postKey
-            }
-            /*        console.log(ownKey)*/
 
-            if (picks.length === 2) {
-                var ownKeyIndex = keys.indexOf(ownKey)
-                var otherKey = keys.splice(ownKeyIndex, 1)
-                var winner = compare(picks[0].choice, picks[1].choice)
-                console.log("player choice is" + playerChoice)
+            database.ref("/users/" + postKey).onDisconnect().remove();
+            console.log(snap.val());
+            var temp = snap.val();
+            keys = Object.keys(snap.val());
+            var ownKey = keys.find(findKey);
+            var ownKeyIndex = keys.indexOf(ownKey);
+            var otherKey = keys.splice(ownKeyIndex, 1);
+            var opponentChoice = temp[otherKey].choice;
+            console.log(playerChoice)
+            console.log(opponentChoice)
+              if ((playerChoice == "rock") && (opponentChoice == "scissors")){
+                wins++
+                console.log("runs")
+                $(".wins").html(wins)
+                $(".winnerIs").html("You win!")
+              } else if ((playerChoice == "rock") && (opponentChoice == "paper")){
+                losses++
+                $(".losses").html(losses)
+                $(".winnerIs").html("You lost!")
+              } else if ((playerChoice == "paper") && (opponentChoice == "rock")){
+                wins++
+                $(".wins").html(wins)
+                $(".winnerIs").html("You win!")
+              }else if ((playerChoice == "paper") && (opponentChoice == "scissors")){
+                losses++
+                $(".losses").html(losses)
+                $(".winnerIs").html("You lost!")
+              } else if ((playerChoice == "scissors") && (opponentChoice == "rock")){
+                losses++
+                $(".losses").html(losses)
+                $(".winnerIs").html("You lost!")
+              } else if ((playerChoice == "scissors") && (opponentChoice == "paper")){
+                wins++
+                $(".wins").html(wins)
+                $(".winnerIs").html("You won!")
+              }  else if (playerChoice == opponentChoice) {
+                $(".winnerIs").html("Tie game..")
+              }
+        })*/
+
+
+    database.ref("/users").on("value", function(snap) {
+        database.ref("/users/" + postKey).onDisconnect().remove()
+        console.log(snap.val())
+            /*        console.log(Object.keys(snap.val())) */
+        temp = snap.val()
+        grabValues()
+
+
+
+        /*
+                    var winner = compare(playerPick, oppPick)
+                    $("winnerIs").html(winner)*/
+        /*        console.log("player choice is" + playerChoice)
                 console.log(" winner is " + winner)
 
-                if (winner === "waiting") {
-                    $(".winnerIs").html("Waiting for the other user to select a choice...")
-                } else if (winner === playerChoice) {
-                    $(".winnerIs").html("You win!")
+                if (winner === playerChoice) {
+                    $(".winnerIs").html("You Win!")
                     wins++
                     $(".wins").html(wins)
                 } else if (winner === "tie") {
@@ -177,13 +208,26 @@ $(document).ready(function() {
                     $(".winnerIs").html("You lost!")
                     losses++
                     $(".losses").html(losses)
-                }
 
+                }*/
+
+    })
+    function grabValues() {
+        for (var propName in temp) {
+            if (temp.hasOwnProperty(propName)) {
+                var propValue = temp[propName];
+                console.log(propValue)
+                
             }
-        })
-
+        }
 
     }
+
+
+
+
+
+
 
     //---------------------------------------------------------------------------
     //
