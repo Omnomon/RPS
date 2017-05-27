@@ -18,9 +18,6 @@ $(document).ready(function() {
     //---------------------------------------------------------------------------
 
     var database = firebase.database()
-        /*  var connectionsRef = database.ref("/connections")
-          var connectedRef = database.ref(".info/connected")
-          var stage = database.ref("/stage")*/
     var currentPlayerNumber = 0;
     var thisPlayerNumber = 0;
     var playerId_;
@@ -31,9 +28,14 @@ $(document).ready(function() {
     postKey = database.ref().push().key
     console.log(postKey)
 
+    var picks = [];
+    var keys = [];
+    var childData;
+    var childKey;
+    var playerIs
     //---------------------------------------------------------------------------
     //
-    // everytime a new connection happens, add it to firebase
+    // everytime a new connection happens, add it to firebase. Limit to 2 connections
     //
     //---------------------------------------------------------------------------
 
@@ -43,33 +45,20 @@ $(document).ready(function() {
     }
 
     function pushUserToFirebase() {
-        database.ref("/users/" + postKey).set(data)
-        database.ref("/users/" + postKey).onDisconnect().remove()
+        database.ref("/users").on("value", function(snap) {
+            if (snap.numChildren() >= 2) {
+                return
+            } else {
+                database.ref("/users/" + postKey).set(data)
+                database.ref("/users/" + postKey).onDisconnect().remove()
+                var playerNumber = snap.numChildren()
+                playerIs = "Player " +(playerNumber + 1)
+                $(".playerNumber").html(playerIs)
+            }
+        })
+
     }
-
-
     pushUserToFirebase()
-
-
-    //---------------------------------------------------------------------------
-    //
-    // use this function to determine currentPlayerNumber...too lazy to clean it right now 
-    //
-    //---------------------------------------------------------------------------
-
-
-    database.ref("/users").on("value", function(snap) {
-
-        var temp = snap.val()
-        if (snap.numChildren() >= 3) {
-            /*          console.log("more than 2 players")*/
-            $("#connected-users").html("more than 2 players")
-        } else {
-            currentPlayerNumber = snap.numChildren()
-            $("#connected-users").html(currentPlayerNumber)
-
-        }
-    })
 
     //---------------------------------------------------------------------------
     //
@@ -94,24 +83,19 @@ $(document).ready(function() {
 
     function compare(choice1, choice2) {
         if ((map[choice1] || {})[choice2]) {
-          database.ref("/users/" + keys[0]).set({
-            choice: ""
-          })
-           database.ref("/users/" + keys[1]).set({
-            choice: ""
-          })
-           return (map[choice1] || {})[choice2]
+            database.ref("/users/" + keys[0]).set({
+                choice: ""
+            })
+            database.ref("/users/" + keys[1]).set({
+                choice: ""
+            })
+            return (map[choice1] || {})[choice2]
         } else {
-          return "Waiting for the other user to select a choice..."
+            return "Waiting for the other user to select a choice..."
         }
 
-/*        return (map[choice1] || {})[choice2] || "Waiting for the other user to select a choice...";*/
     }
 
-    var picks = [];
-    var keys = [];
-    var childData;
-    var childKey;
 
 
     //---------------------------------------------------------------------------
@@ -121,22 +105,18 @@ $(document).ready(function() {
     //---------------------------------------------------------------------------
 
 
-      database.ref("/users").on("value", function(snap) {
-          console.log(snap.val())
-          var temp = snap.val()
-          picks = Object.values(snap.val())
-          keys = Object.keys(snap.val())
-          console.log(picks)
-          console.log(keys[0])
-          if (picks.length === 2 ) {
+    database.ref("/users").on("value", function(snap) {
+        console.log(snap.val())
+        var temp = snap.val()
+        picks = Object.values(snap.val())
+        keys = Object.keys(snap.val())
+        console.log(picks)
+        console.log(keys[0])
+        if (picks.length === 2) {
             var winner = compare(picks[0].choice, picks[1].choice)
             $(".winnerIs").html(winner)
-          }
-
-
-
-                
-      })
+        }
+    })
 
 
     $(document).on("click", "#rock", function(event) {
@@ -145,6 +125,7 @@ $(document).ready(function() {
         database.ref("/users/" + postKey).set({
             choice: "rock"
         })
+
     }).blur()
 
     $(document).on("click", "#paper", function(event) {
@@ -162,5 +143,18 @@ $(document).ready(function() {
         })
         console.log("scissors works")
     }).blur()
+
+    //---------------------------------------------------------------------------
+    //
+    // Chat functionality
+    //
+    //---------------------------------------------------------------------------
+
+    $(".chatSend").click(function(){
+      var chatText = $(".chatText").val()
+      database.ref("/chat").set({chatText})
+      $(".chatText").val() = "";
+      
+    })
 
 })
