@@ -128,7 +128,7 @@ $(document).ready(function() {
         if (picks.length === 2) {
             var winner = compare(picks[0].choice, picks[1].choice)
             $(".winnerIs").html(winner)
-            translate()
+
         }
     })
 
