@@ -116,7 +116,12 @@ $(document).ready(function() {
         console.log(keys[0])
         if (picks.length === 2) {
             var winner = compare(picks[0].choice, picks[1].choice)
-                /*            $(".winnerIs").html(winner)*/
+            database.ref("/users/" + keys[0]).set({
+                choice: ""
+            })
+            database.ref("/users/" + keys[1]).set({
+                choice: ""
+            })
             winLossCounter()
         }
 
@@ -134,12 +139,7 @@ $(document).ready(function() {
                 losses++
                 $(".losses").html(losses)
             }
-            database.ref("/users/" + keys[0]).set({
-                choice: ""
-            })
-            database.ref("/users/" + keys[1]).set({
-                choice: ""
-            })
+
 
         }
     })
