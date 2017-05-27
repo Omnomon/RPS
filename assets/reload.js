@@ -33,11 +33,11 @@ $(document).ready(function() {
     var childData;
     var childKey;
     var playerIs
-    //---------------------------------------------------------------------------
-    //
-    // everytime a new connection happens, add it to firebase. Limit to 2 connections
-    //
-    //---------------------------------------------------------------------------
+        //---------------------------------------------------------------------------
+        //
+        // everytime a new connection happens, add it to firebase. Limit to 2 connections
+        //
+        //---------------------------------------------------------------------------
 
 
     data = {
@@ -52,7 +52,7 @@ $(document).ready(function() {
                 database.ref("/users/" + postKey).set(data)
                 database.ref("/users/" + postKey).onDisconnect().remove()
                 var playerNumber = snap.numChildren()
-                playerIs = "Player " +(playerNumber + 1)
+                playerIs = "Player " + (playerNumber + 1)
                 $(".playerNumber").html(playerIs)
             }
         })
@@ -96,7 +96,20 @@ $(document).ready(function() {
 
     }
 
+    function translate() {
+        if (winner === playerChoice) {
+            $(".winnerIs").html("You Win!")
+            wins++
+            $(".wins").html(wins)
+        } else if (winner === "tie") {
+            $(".winnerIs").html("Tie...")
+        } else {
+            $(".winnerIs").html("You lost!")
+            losses++
+            $(".losses").html(losses)
 
+        }
+    }
 
     //---------------------------------------------------------------------------
     //
@@ -115,6 +128,7 @@ $(document).ready(function() {
         if (picks.length === 2) {
             var winner = compare(picks[0].choice, picks[1].choice)
             $(".winnerIs").html(winner)
+            translate()
         }
     })
 
@@ -125,6 +139,8 @@ $(document).ready(function() {
         database.ref("/users/" + postKey).set({
             choice: "rock"
         })
+        $(".playerPicked").html("Rock");
+
         $(this).blur()
 
     })
@@ -135,6 +151,8 @@ $(document).ready(function() {
             choice: "paper"
         })
         $(this).blur()
+        $(".playerPicked").html("Paper");
+
         console.log("paper works")
     })
 
@@ -143,9 +161,11 @@ $(document).ready(function() {
         database.ref("/users/" + postKey).set({
             choice: "scissors"
         })
+        $(".playerPicked").html("Scissors");
+
         $(this).blur()
         console.log("scissors works")
-    }) 
+    })
 
     //---------------------------------------------------------------------------
     //
