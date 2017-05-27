@@ -20,23 +20,19 @@
         <div class="row">
             <div class="col-xs-4">
                 <br>
-                <div class="text-center">
+                <div>
                     <p> You are : <span class="playerNumber"></span></p>
-                    <div class="player1picks"></div>
-                    <div class="winCount">
+                    <p>Your selection: <span class="playerPicked"></span></p>
                     	<p>Wins: <span class="wins"></span></p>
                     	<p>Losses <span class="losses"></span></p>
-                    </div>
                 </div>
             </div>
             <div class="col-xs-4">
-                <div class="col-xs-4"></div>
                 <div class="btn-group-vertical col-xs-4">
                     <button type="button" class="btn btn-secondary rock" id="rock">Rock</button>
                     <button type="button" class="btn btn-secondary" id="paper">Paper</button>
                     <button type="button" class="btn btn-secondary" id="scissors">Scissors</button>
                 </div>
-                <div class="col-xs-4"></div>
             </div>
             <div class="col-xs-4">
                 <div class="winnerIs"></div>
@@ -46,8 +42,12 @@
         <div class="col-xs-6">
         <br>
         <br>
-        
+			<div class="input-group">
+				<span class="input-group-addon">Username</span>
+            	<input type="text" class="form-control chatName" name="name" value="Bob">
+			</div>
             <div class="input-group">
+
                 <input type="text" class="form-control chatText" name="chat" placeholder="Talk trash here...">
                 <span class="input-group-btn">
         		<button class="btn btn-default chatSend">Send</button>

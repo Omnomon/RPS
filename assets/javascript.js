@@ -33,6 +33,9 @@ $(document).ready(function() {
     var childData;
     var childKey;
     var playerIs
+
+    $(".wins").html(wins)
+    $(".losses").html(losses)
         //---------------------------------------------------------------------------
         //
         // everytime a new connection happens, add it to firebase. Limit to 2 connections
@@ -43,6 +46,8 @@ $(document).ready(function() {
     data = {
         choice: ""
     }
+
+
 
     function pushUserToFirebase() {
         database.ref("/users").on("value", function(snap) {
@@ -76,9 +81,9 @@ $(document).ready(function() {
 
     choices.forEach(function(choice, i) {
         map[choice] = {};
-        map[choice][choice] = "Was a tie"
-        map[choice][choices[(i + 1) % 3]] = choices[(i + 1) % 3] + " wins"
-        map[choice][choices[(i + 2) % 3]] = choice + " wins"
+        map[choice][choice] = "tie"
+        map[choice][choices[(i + 1) % 3]] = choices[(i + 1) % 3] 
+        map[choice][choices[(i + 2) % 3]] = choice 
     })
 
     function compare(choice1, choice2) {
@@ -91,11 +96,14 @@ $(document).ready(function() {
             })
             return (map[choice1] || {})[choice2]
         } else {
-            return "Waiting for the other user to select a choice..."
+            return "waiting"
         }
 
     }
 
+    function winLossCounter(){
+
+    }
 
 
     //---------------------------------------------------------------------------
@@ -114,8 +122,32 @@ $(document).ready(function() {
         console.log(keys[0])
         if (picks.length === 2) {
             var winner = compare(picks[0].choice, picks[1].choice)
-            $(".winnerIs").html(winner)
+/*            $(".winnerIs").html(winner)*/
+              winLossCounter()
         }
+            function winLossCounter(){
+              if (winner === "waiting") {
+                $(".winnerIs").html("Waiting for the other user to select a choice...")
+              } else if (winner === playerChoice) {
+                $(".winnerIs").html("You win!")
+                wins ++
+                $(".wins").html(wins)
+              } else if ( winner === "tie"){
+                $(".winnerIs").html("Tie...")
+              } else {
+                 $(".winnerIs").html("You lost!")
+                losses ++ 
+                $(".losses").html(losses)
+
+              }
+/*              if (winner === playerChoice) {
+                $(".winnerIs").html("You win!")
+                wins ++
+              } else {
+                $(".winnerIs").html("You lost!")
+                losses ++ 
+              }*/
+           }
     })
 
 
@@ -126,6 +158,7 @@ $(document).ready(function() {
             choice: "rock"
         })
         playerChoice = "rock"
+        $(".playerPicked").html("Rock")
         console.log("rock works")
 
     }).blur()
@@ -137,6 +170,8 @@ $(document).ready(function() {
             choice: "paper"
         })
         playerChoice = "paper"
+        $(".playerPicked").html("Paper")
+
 
         console.log("paper works")
     }).blur()
@@ -148,6 +183,8 @@ $(document).ready(function() {
             choice: "scissors"
         })
         playerChoice = "scissors"
+        $(".playerPicked").html("Scissors")
+
 
         console.log("scissors works")
     }).blur()
@@ -160,23 +197,29 @@ $(document).ready(function() {
     database.ref("/chat").set({})
 
     $(".chatSend").click(function() {
+        var chatName = $(".chatName").val()
         var chatText = $(".chatText").val()
-        database.ref("/chat").push({ chatText })
+        database.ref("/chat").push({ chatName, chatText })
         $(".chatText").val("")
     })
 
     $(document).keyup(function(event) {
         if (event.keyCode === 13) {
+            var chatName = $(".chatName").val()
             var chatText = $(".chatText").val()
-            database.ref("/chat").push({ chatText })
+            database.ref("/chat").push({ chatName, chatText })
             $(".chatText").val("")
         }
     })
 
     var startListening = function() {
+        database.ref("/users").on("child_added", function(snap) {
+            playerIs = "Player " + (playerNumber + 1)
+        })
+
         database.ref("/chat").on("child_added", function(snap) {
             var msg = snap.val()
-            var msgTextElement = $("<p>").html(playerIs + ": " + msg.chatText)
+            var msgTextElement = $("<p>").html(msg.chatName +  ": " + msg.chatText)
             var msgElement = $("<div>").addClass("post")
             msgElement.append(msgTextElement)
             $(".chatDisplay").append(msgElement)
