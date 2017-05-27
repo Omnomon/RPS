@@ -82,18 +82,14 @@ $(document).ready(function() {
     choices.forEach(function(choice, i) {
         map[choice] = {};
         map[choice][choice] = "tie"
-        map[choice][choices[(i + 1) % 3]] = choices[(i + 1) % 3] 
-        map[choice][choices[(i + 2) % 3]] = choice 
+        map[choice][choices[(i + 1) % 3]] = choices[(i + 1) % 3]
+        map[choice][choices[(i + 2) % 3]] = choice
     })
+
+    console.log(map)
 
     function compare(choice1, choice2) {
         if ((map[choice1] || {})[choice2]) {
-            database.ref("/users/" + keys[0]).set({
-                choice: ""
-            })
-            database.ref("/users/" + keys[1]).set({
-                choice: ""
-            })
             return (map[choice1] || {})[choice2]
         } else {
             return "waiting"
@@ -101,9 +97,7 @@ $(document).ready(function() {
 
     }
 
-    function winLossCounter(){
 
-    }
 
 
     //---------------------------------------------------------------------------
@@ -122,32 +116,32 @@ $(document).ready(function() {
         console.log(keys[0])
         if (picks.length === 2) {
             var winner = compare(picks[0].choice, picks[1].choice)
-/*            $(".winnerIs").html(winner)*/
-              winLossCounter()
+                /*            $(".winnerIs").html(winner)*/
+            winLossCounter()
         }
-            function winLossCounter(){
-              if (winner === "waiting") {
-                $(".winnerIs").html("Waiting for the other user to select a choice...")
-              } else if (winner === playerChoice) {
-                $(".winnerIs").html("You win!")
-                wins ++
-                $(".wins").html(wins)
-              } else if ( winner === "tie"){
-                $(".winnerIs").html("Tie...")
-              } else {
-                 $(".winnerIs").html("You lost!")
-                losses ++ 
-                $(".losses").html(losses)
 
-              }
-/*              if (winner === playerChoice) {
+        function winLossCounter() {
+            if (winner === "waiting") {
+                $(".winnerIs").html("Waiting for the other user to select a choice...")
+            } else if (winner === playerChoice) {
                 $(".winnerIs").html("You win!")
-                wins ++
-              } else {
+                wins++
+                $(".wins").html(wins)
+            } else if (winner === "tie") {
+                $(".winnerIs").html("Tie...")
+            } else {
                 $(".winnerIs").html("You lost!")
-                losses ++ 
-              }*/
-           }
+                losses++
+                $(".losses").html(losses)
+            }
+            database.ref("/users/" + keys[0]).set({
+                choice: ""
+            })
+            database.ref("/users/" + keys[1]).set({
+                choice: ""
+            })
+
+        }
     })
 
 
@@ -219,7 +213,7 @@ $(document).ready(function() {
 
         database.ref("/chat").on("child_added", function(snap) {
             var msg = snap.val()
-            var msgTextElement = $("<p>").html(msg.chatName +  ": " + msg.chatText)
+            var msgTextElement = $("<p>").html(msg.chatName + ": " + msg.chatText)
             var msgElement = $("<div>").addClass("post")
             msgElement.append(msgTextElement)
             $(".chatDisplay").append(msgElement)
